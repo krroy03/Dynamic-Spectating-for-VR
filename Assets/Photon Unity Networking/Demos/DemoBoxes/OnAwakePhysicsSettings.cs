@@ -1,19 +1,28 @@
 using UnityEngine;
-using System.Collections;
 
-[RequireComponent(typeof(Rigidbody))]
-[RequireComponent(typeof(PhotonView))]
-public class OnAwakePhysicsSettings : Photon.MonoBehaviour {
-
-    // this tiny script "disables" the rigidbody for remotely controlled GameObjects (owned by someone else)
-    void Awake()
+/// <summary>
+/// Sets isKinematic to true, GameObject is owned by a another player (PhotonView.isMine == false).
+/// For Rigidbody and Rigidbody2D.
+/// </summary>
+[RequireComponent(typeof (PhotonView))]
+public class OnAwakePhysicsSettings : Photon.MonoBehaviour
+{
+    public void Awake()
     {
-        if (!this.photonView.isMine)
+        if (!photonView.isMine)
         {
-            Rigidbody attachedRigidbody = this.GetComponent<Rigidbody>();
+            Rigidbody attachedRigidbody = GetComponent<Rigidbody>();
             if (attachedRigidbody != null)
             {
                 attachedRigidbody.isKinematic = true;
+            }
+            else
+            {
+                Rigidbody2D attachedRigidbody2d = GetComponent<Rigidbody2D>();
+                if (attachedRigidbody2d != null)
+                {
+                    attachedRigidbody2d.isKinematic = true;
+                }
             }
         }
     }

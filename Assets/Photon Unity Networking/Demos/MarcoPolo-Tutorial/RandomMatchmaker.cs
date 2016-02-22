@@ -1,34 +1,40 @@
 using UnityEngine;
 
-public class RandomMatchmaker : Photon.MonoBehaviour
+public class RandomMatchmaker : Photon.PunBehaviour
 {
     private PhotonView myPhotonView;
 
     // Use this for initialization
-    void Start()
+    public void Start()
     {
         PhotonNetwork.ConnectUsingSettings("0.1");
     }
 
-    void OnJoinedLobby()
+    public override void OnJoinedLobby()
     {
         Debug.Log("JoinRandom");
         PhotonNetwork.JoinRandomRoom();
     }
 
-    void OnPhotonRandomJoinFailed()
+    public override void OnConnectedToMaster()
+    {
+        // when AutoJoinLobby is off, this method gets called when PUN finished the connection (instead of OnJoinedLobby())
+        PhotonNetwork.JoinRandomRoom();
+    }
+
+    public void OnPhotonRandomJoinFailed()
     {
         PhotonNetwork.CreateRoom(null);
     }
 
-    void OnJoinedRoom()
+    public override void OnJoinedRoom()
     {
         GameObject monster = PhotonNetwork.Instantiate("monsterprefab", Vector3.zero, Quaternion.identity, 0);
         monster.GetComponent<myThirdPersonController>().isControllable = true;
         myPhotonView = monster.GetComponent<PhotonView>();
     }
 
-    void OnGUI()
+    public void OnGUI()
     {
         GUILayout.Label(PhotonNetwork.connectionStateDetailed.ToString());
 

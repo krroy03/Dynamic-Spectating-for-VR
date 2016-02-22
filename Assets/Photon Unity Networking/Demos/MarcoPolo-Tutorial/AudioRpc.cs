@@ -6,35 +6,42 @@ public class AudioRpc : Photon.MonoBehaviour
     public AudioClip marco;
     public AudioClip polo;
 
-    [RPC]
+    AudioSource m_Source;
+
+    void Awake()
+    {
+        m_Source = GetComponent<AudioSource>();
+    }
+
+    [PunRPC]
     void Marco()
     {
-        if (!this.enabled)
+        if( !this.enabled )
         {
             return;
         }
 
-        Debug.Log("Marco");
+        Debug.Log( "Marco" );
 
-        this.GetComponent<AudioSource>().clip = marco;
-        this.GetComponent<AudioSource>().Play();
+        m_Source.clip = marco;
+        m_Source.Play();
     }
 
-    [RPC]
+    [PunRPC]
     void Polo()
     {
-        if (!this.enabled)
+        if( !this.enabled )
         {
             return;
         }
 
-        Debug.Log("Polo");
+        Debug.Log( "Polo" );
 
-        this.GetComponent<AudioSource>().clip = polo;
-        this.GetComponent<AudioSource>().Play();
+        m_Source.clip = polo;
+        m_Source.Play();
     }
 
-    void OnApplicationFocus(bool focus)
+    void OnApplicationFocus( bool focus )
     {
         this.enabled = focus;
     }

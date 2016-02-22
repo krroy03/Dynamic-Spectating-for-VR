@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEditor;
 
 [InitializeOnLoad]
 public class PunStartup : MonoBehaviour
-{
+{ 
     // paths to demo scenes to setup (if needed)
     private const string demoBasePath = "Assets/Photon Unity Networking/Demos/";
     private static string[] demoPaths =
@@ -18,7 +19,8 @@ public class PunStartup : MonoBehaviour
             "MarcoPolo-Tutorial/MarcoPolo-Scene.unity",
             "DemoSynchronization/DemoSynchronization-Scene.unity",
             "DemoFriendsAndCustomAuth/DemoFriends-Scene.unity",
-            "DemoFriendsAndCustomAuth/DemoPickup-Scene.unity"
+            "DemoFriendsAndCustomAuth/DemoPickup-Scene.unity",
+            "DemoChat/DemoChat-Scene.unity"
         };
 
     static PunStartup()
@@ -32,6 +34,11 @@ public class PunStartup : MonoBehaviour
 
     static void OnUpdate()
     {
+        if (EditorApplication.isUpdating)
+        {
+            return;
+        }
+
         bool doneBefore = EditorPrefs.GetBool("PunDemosOpenedBefore");
         if (doneBefore)
         {
@@ -39,20 +46,20 @@ public class PunStartup : MonoBehaviour
             return;
         }
 
-        if (String.IsNullOrEmpty(EditorApplication.currentScene) && EditorBuildSettings.scenes.Length == 0)
+        if (string.IsNullOrEmpty(SceneManagerHelper.EditorActiveSceneName) && EditorBuildSettings.scenes.Length == 0)
         {
-            #if UNITY_4_2 || UNITY_4_3 || UNITY_4_4 || UNITY_4_5 || UNITY_4_6 || UNITY_5 || UNITY_5_1 || UNITY_5_2
-            if (EditorApplication.isUpdating) return;
-            #endif
-
             LoadPunDemoHub();
             SetPunDemoBuildSettings();
             EditorPrefs.SetBool("PunDemosOpenedBefore", true);
             Debug.Log("No scene was open. Loaded PUN Demo Hub Scene and added demos to build settings. Ready to go! This auto-setup is now disabled in this Editor.");
         }
+        else
+        {
+            EditorApplication.update -= OnUpdate;
+        }
     }
 
-    [MenuItem("Window/Photon Unity Networking/Apply Build Setup for Demos")]
+    [MenuItem("Window/Photon Unity Networking/Configure Demos (build setup)", false, 5)]
     public static void SetupDemo()
     {
         SetPunDemoBuildSettings();
@@ -66,11 +73,8 @@ public class PunStartup : MonoBehaviour
 
     public static void LoadPunDemoHub()
     {
-        bool ret = EditorApplication.OpenScene(demoBasePath + demoPaths[0]);
-        if (ret)
-        {
-            Selection.activeObject = AssetDatabase.LoadMainAssetAtPath(demoBasePath + demoPaths[0]);
-        }
+        EditorSceneManager.OpenScene(demoBasePath + demoPaths[0]);
+        Selection.activeObject = AssetDatabase.LoadMainAssetAtPath(demoBasePath + demoPaths[0]);
     }
 
     /// <summary>
@@ -118,6 +122,6 @@ public class PunStartup : MonoBehaviour
         }
 
         EditorBuildSettings.scenes = sceneAr.ToArray();
-        EditorApplication.OpenScene(sceneAr[0].path);
+        EditorSceneManager.OpenScene(sceneAr[0].path);
     }
 }

@@ -1,22 +1,28 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class SpectatorControls : MonoBehaviour {
+public class SpectatorControls : Photon.MonoBehaviour
+{
 
+	private PhotonView myView;
 	// Use this for initialization
-	void Start () {
-	
+	void Start ()
+	{
+		myView = this.gameObject.GetComponent<PhotonView> ();
 	}
 	
 	// Update is called once per frame
-	void Update () {
+	void Update ()
+	{
 
-		if (Input.GetMouseButton (0)) {
-			SpectatorInfluence ();
+		if (Input.GetMouseButton (0) && !GameManager.Instance.VR) {
+			myView.RPC ("SpectatorInfluence", PhotonTargets.All);
 		}
 	}
 
-	void SpectatorInfluence() {
-		this.gameObject.GetComponent<ParticleSystem> ().Emit (50);
+	[PunRPC]
+	void SpectatorInfluence ()
+	{
+		NetworkManager.Instance.SpectatorInfluence ();
 	}
 }

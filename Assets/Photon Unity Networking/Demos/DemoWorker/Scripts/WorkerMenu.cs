@@ -10,6 +10,8 @@ using Random = UnityEngine.Random;
 
 public class WorkerMenu : MonoBehaviour
 {
+    public GUISkin Skin;
+    public Vector2 WidthAndHeight = new Vector2(600, 400);
     private string roomName = "myRoom";
 
     private Vector2 scrollPos = Vector2.zero;
@@ -22,18 +24,16 @@ public class WorkerMenu : MonoBehaviour
 
     private string errorDialog;
     private double timeToClearDialog;
+
     public string ErrorDialog
     {
-        get 
-        { 
-            return errorDialog; 
-        }
+        get { return this.errorDialog; }
         private set
         {
-            errorDialog = value;
+            this.errorDialog = value;
             if (!string.IsNullOrEmpty(value))
             {
-                timeToClearDialog = Time.time + 4.0f;
+                this.timeToClearDialog = Time.time + 4.0f;
             }
         }
     }
@@ -62,6 +62,11 @@ public class WorkerMenu : MonoBehaviour
 
     public void OnGUI()
     {
+        if (this.Skin != null)
+        {
+            GUI.skin = this.Skin;
+        }
+
         if (!PhotonNetwork.connected)
         {
             if (PhotonNetwork.connecting)
@@ -72,13 +77,13 @@ public class WorkerMenu : MonoBehaviour
             {
                 GUILayout.Label("Not connected. Check console output. Detailed connection state: " + PhotonNetwork.connectionStateDetailed + " Server: " + PhotonNetwork.ServerAddress);
             }
-            
+
             if (this.connectFailed)
             {
                 GUILayout.Label("Connection failed. Check setup and use Setup Wizard to fix configuration.");
                 GUILayout.Label(String.Format("Server: {0}", new object[] {PhotonNetwork.ServerAddress}));
-                GUILayout.Label("AppId: " + PhotonNetwork.PhotonServerSettings.AppID);
-                
+                GUILayout.Label("AppId: " + PhotonNetwork.PhotonServerSettings.AppID.Substring(0, 8) + "****"); // only show/log first 8 characters. never log the full AppId.
+
                 if (GUILayout.Button("Try Again", GUILayout.Width(100)))
                 {
                     this.connectFailed = false;
@@ -89,18 +94,17 @@ public class WorkerMenu : MonoBehaviour
             return;
         }
 
+        Rect content = new Rect((Screen.width - this.WidthAndHeight.x)/2, (Screen.height - this.WidthAndHeight.y)/2, this.WidthAndHeight.x, this.WidthAndHeight.y);
+        GUI.Box(content, "Join or Create Room");
+        GUILayout.BeginArea(content);
 
-        GUI.skin.box.fontStyle = FontStyle.Bold;
-        GUI.Box(new Rect((Screen.width - 400) / 2, (Screen.height - 350) / 2, 400, 300), "Join or Create a Room");
-        GUILayout.BeginArea(new Rect((Screen.width - 400) / 2, (Screen.height - 350) / 2, 400, 300));
-
-        GUILayout.Space(25);
+        GUILayout.Space(40);
 
         // Player name
         GUILayout.BeginHorizontal();
-        GUILayout.Label("Player name:", GUILayout.Width(100));
+        GUILayout.Label("Player name:", GUILayout.Width(150));
         PhotonNetwork.playerName = GUILayout.TextField(PhotonNetwork.playerName);
-        GUILayout.Space(105);
+        GUILayout.Space(158);
         if (GUI.changed)
         {
             // Save name
@@ -112,12 +116,12 @@ public class WorkerMenu : MonoBehaviour
 
         // Join room by title
         GUILayout.BeginHorizontal();
-        GUILayout.Label("Roomname:", GUILayout.Width(100));
+        GUILayout.Label("Roomname:", GUILayout.Width(150));
         this.roomName = GUILayout.TextField(this.roomName);
-        
-        if (GUILayout.Button("Create Room", GUILayout.Width(100)))
+
+        if (GUILayout.Button("Create Room", GUILayout.Width(150)))
         {
-            PhotonNetwork.CreateRoom(this.roomName, new RoomOptions() { maxPlayers = 10 }, null);
+            PhotonNetwork.CreateRoom(this.roomName, new RoomOptions() {maxPlayers = 10}, null);
         }
 
         GUILayout.EndHorizontal();
@@ -126,7 +130,7 @@ public class WorkerMenu : MonoBehaviour
         GUILayout.BeginHorizontal();
         GUILayout.FlexibleSpace();
         //this.roomName = GUILayout.TextField(this.roomName);
-        if (GUILayout.Button("Join Room", GUILayout.Width(100)))
+        if (GUILayout.Button("Join Room", GUILayout.Width(150)))
         {
             PhotonNetwork.JoinRoom(this.roomName);
         }
@@ -134,14 +138,14 @@ public class WorkerMenu : MonoBehaviour
         GUILayout.EndHorizontal();
 
 
-        if (!string.IsNullOrEmpty(this.ErrorDialog))
+        if (!string.IsNullOrEmpty(ErrorDialog))
         {
-            GUILayout.Label(this.ErrorDialog);
+            GUILayout.Label(ErrorDialog);
 
-            if (timeToClearDialog < Time.time)
+            if (this.timeToClearDialog < Time.time)
             {
-                timeToClearDialog = 0;
-                this.ErrorDialog = "";
+                this.timeToClearDialog = 0;
+                ErrorDialog = "";
             }
         }
 
@@ -152,11 +156,11 @@ public class WorkerMenu : MonoBehaviour
 
         GUILayout.Label(PhotonNetwork.countOfPlayers + " users are online in " + PhotonNetwork.countOfRooms + " rooms.");
         GUILayout.FlexibleSpace();
-        if (GUILayout.Button("Join Random", GUILayout.Width(100)))
+        if (GUILayout.Button("Join Random", GUILayout.Width(150)))
         {
             PhotonNetwork.JoinRandomRoom();
         }
-        
+
 
         GUILayout.EndHorizontal();
 
@@ -168,7 +172,7 @@ public class WorkerMenu : MonoBehaviour
         }
         else
         {
-            GUILayout.Label(PhotonNetwork.GetRoomList() + " currently available. Join either:");
+            GUILayout.Label(PhotonNetwork.GetRoomList().Length + " rooms available:");
 
             // Room listing: simply call GetRoomList: no need to fetch/poll whatever!
             this.scrollPos = GUILayout.BeginScrollView(this.scrollPos);
@@ -176,7 +180,7 @@ public class WorkerMenu : MonoBehaviour
             {
                 GUILayout.BeginHorizontal();
                 GUILayout.Label(roomInfo.name + " " + roomInfo.playerCount + "/" + roomInfo.maxPlayers);
-                if (GUILayout.Button("Join"))
+                if (GUILayout.Button("Join", GUILayout.Width(150)))
                 {
                     PhotonNetwork.JoinRoom(roomInfo.name);
                 }
@@ -196,21 +200,21 @@ public class WorkerMenu : MonoBehaviour
         Debug.Log("OnJoinedRoom");
     }
 
-
     public void OnPhotonCreateRoomFailed()
     {
-        this.ErrorDialog = "Error: Can't create room (room name maybe already used).";
+        ErrorDialog = "Error: Can't create room (room name maybe already used).";
         Debug.Log("OnPhotonCreateRoomFailed got called. This can happen if the room exists (even if not visible). Try another room name.");
     }
 
-    public void OnPhotonJoinRoomFailed()
+    public void OnPhotonJoinRoomFailed(object[] cause)
     {
-        this.ErrorDialog = "Error: Can't join room (full or unknown room name).";
+        ErrorDialog = "Error: Can't join room (full or unknown room name). " + cause[1];
         Debug.Log("OnPhotonJoinRoomFailed got called. This can happen if the room is not existing or full or closed.");
     }
+
     public void OnPhotonRandomJoinFailed()
     {
-        this.ErrorDialog = "Error: Can't join random room (none found).";
+        ErrorDialog = "Error: Can't join random room (none found).";
         Debug.Log("OnPhotonRandomJoinFailed got called. Happens if no room is available (or all full or invisible or closed). JoinrRandom filter-options can limit available rooms.");
     }
 
@@ -228,6 +232,6 @@ public class WorkerMenu : MonoBehaviour
     public void OnFailedToConnectToPhoton(object parameters)
     {
         this.connectFailed = true;
-        Debug.Log("OnFailedToConnectToPhoton. StatusCode: " + parameters + " ServerAddress: " + PhotonNetwork.networkingPeer.ServerAddress);
+        Debug.Log("OnFailedToConnectToPhoton. StatusCode: " + parameters + " ServerAddress: " + PhotonNetwork.ServerAddress);
     }
 }

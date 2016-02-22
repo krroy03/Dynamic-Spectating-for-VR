@@ -10,7 +10,9 @@ public class VRPlayerController : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
-		KeyMovement ();
+		if (GameManager.Instance.VR)
+			KeyMovement ();
+
 	}
 
 	public float keySpeed = 5.0f; 
@@ -39,7 +41,8 @@ public class VRPlayerController : MonoBehaviour {
 
 		}
 
-		this.transform.Translate (this.transform.GetChild(0).forward * Time.deltaTime * keySpeed, Space.World);
+		Vector3 dir = new Vector3 (Camera.main.transform.forward.x, 0.0f, Camera.main.transform.forward.z);
+		this.transform.Translate (dir * Time.deltaTime * keySpeed, Space.World);
 
 	}
 }
