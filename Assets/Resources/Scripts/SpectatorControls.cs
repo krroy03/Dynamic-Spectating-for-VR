@@ -15,7 +15,8 @@ public class SpectatorControls : Photon.MonoBehaviour
 	void Update ()
 	{
 
-		if (Input.GetMouseButton (0) && !GameManager.Instance.VR) {
+		if (Input.GetMouseButtonUp (0) && !GameManager.Instance.VR) {
+			
 			myView.RPC ("SpectatorInfluence", PhotonTargets.All);
 		}
 	}
