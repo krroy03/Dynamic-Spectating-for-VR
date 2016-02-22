@@ -9,7 +9,8 @@ public class NetworkMazeCube : Photon.MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-	
+		GameObject par = GameObject.Find ("Maze");
+		this.transform.SetParent (par.transform);
 	}
 	
 	// Update is called once per frame

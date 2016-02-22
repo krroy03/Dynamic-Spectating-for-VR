@@ -105,11 +105,10 @@ public class MazeGenerator : MonoBehaviour {
 			{
 				if (Maze[i, j] == 1)
 				{
-					//ptype = GameObject.CreatePrimitive(PrimitiveType.Cube);
 					ptype = PhotonNetwork.Instantiate ("Prefabs/Cube", this.transform.position, this.transform.rotation, 0);
 					ptype.transform.localScale = new Vector3 (cubeSize, cubeSize, cubeSize);
 					ptype.transform.position = new Vector3(i * ptype.transform.localScale.x, j * ptype.transform.localScale.y, 0);
-					;
+
 
 					// destroys maze
 					//Rigidbody cubeBody = ptype.AddComponent<Rigidbody> ();
